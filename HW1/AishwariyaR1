@@ -1,0 +1,21 @@
+with base(cust,min,max,avg) as
+(select cust,min(quant) as min,max(quant) as max,avg(quant) as avg
+	from sales
+	group by cust),
+
+high(customer,max_q,max_prod,max_date,max_st,avg_q) as
+(select base.cust as customer,base.max as max_q,sales.prod as max_prod,sales.month||'/'||sales.day||'/'||sales.year as max_date,sales.state as max_st,base.avg as avg_q
+	from sales,base
+	where sales.cust=base.cust and
+	base.max = sales.quant),
+
+low(customer,min_q,min_prod,min_date,min_st) as
+(select base.cust as customer,base.min as min_q,sales.prod as min_prod,sales.month||'/'||sales.day||'/'||sales.year min_date,sales.state as min_st
+	from sales,base
+	where sales.cust=base.cust and
+	base.min = sales.quant)
+
+select * 
+	from low
+	natural join high
+	order by customer

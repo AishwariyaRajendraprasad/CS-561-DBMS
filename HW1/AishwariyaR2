@@ -1,0 +1,16 @@
+with Sums(prod,month,sum) as
+(select prod,month, sum(quant)
+from sales
+group by prod, month),
+
+details(Most_pop,Least_pop,month) as
+(select max(sum) as Most_pop,min(sum) as Least_pop,month
+from Sums
+group by month)
+
+select details.month as MONTH,A.prod as MOST_POPULAR_PROD, details.Most_pop as MOST_POP_TOTAL_Q,B.prod as LEAST_POPULAR_PROD,details.Least_pop as LEAST_POP_TOTAL_Q
+from Sums A,Sums B,details
+where A.sum = details.Most_pop and
+      B.sum = details.Least_pop
+order by details.month
+		

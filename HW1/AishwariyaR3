@@ -1,0 +1,14 @@
+with base(month,tot,prod) as
+(select month,sum(quant) as tot,prod
+from sales
+group by month,prod),
+
+Bmx(prod,maxi,mini) as
+(select prod,max(tot) as maxi,min(tot) as mini
+from base
+group by prod)
+
+select Bmx.prod as PRODUCT,a.month as MOST_FAV_MO,b.month as LEAST_FAV_MO
+from base a,base b,Bmx
+where Bmx.maxi=a.tot and
+          Bmx.mini=b.tot

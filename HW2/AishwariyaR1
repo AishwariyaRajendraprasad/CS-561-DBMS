@@ -1,0 +1,29 @@
+with average(customer,product,state,average) as
+
+(select cust as customer,prod as product, state, avg(quant) as average 
+ from sales 
+ group by cust,prod,state),
+
+other_cust_avg(customer,product,state,other_cust_avg) as 
+	
+(select a.cust as customer,a.prod as product,a.state,avg(b.quant) as other_cust_avg 
+from sales a, sales b 
+where a.prod = b.prod and
+	  a.cust != b.cust and
+	  a.state = b.state
+group by a.cust,a.prod,a.state ),
+
+other_prod_avg(customer,product,state,other_prod_avg) as
+
+(select a.cust as customer,a.prod as product,a.state,avg(b.quant) as other_prod_avg 
+ from sales a, sales b
+ where a.prod != b.prod  and
+ 	   a.state = b.state and 
+ 	   a.cust = b.cust
+group by a.cust,a.prod,a.state)
+
+select * from average 
+natural join other_cust_avg 
+natural join other_prod_avg 
+order by customer,product,state
+

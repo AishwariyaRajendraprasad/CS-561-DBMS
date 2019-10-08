@@ -1,0 +1,26 @@
+with monthly(cust,prod,month,monthly) as(
+select cust,prod,month,sum(quant) as monthly 
+	from sales 
+	group by cust,prod,month 
+	order by cust,prod,month), 
+
+cumulative(cust,prod,month,monthly,cum_sum) as(
+select a.cust,a.prod,a.month,a.monthly,SUM(b.monthly) as cum_sum
+	from monthly as a,monthly as b
+	where a.prod = b.prod and
+	a.cust = b.cust and
+	b.month <= a.month
+	group by a.cust,a.month,a.prod,a.monthly
+	order by a.cust,a.prod,a.month),
+
+total(cust,prod) as(
+select cust,prod,sum(quant) 
+	from sales 
+	group by cust,prod 
+	order by cust,prod)
+
+select cs.cust as "CUSTOMER",cs.prod as "PRODUCT" ,min(cs.month) as "1/2 PURCHASED BY MONTH" 
+	from cumulative cs,total ts
+	where cs.cust = ts.cust and cs.prod = ts.prod and cs.cum_sum >= ts.sum/2
+	group by cs.cust,cs.prod 
+	order by cs.cust,cs.prod

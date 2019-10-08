@@ -1,0 +1,28 @@
+select before.*,after.avg as after_avg from
+
+	( select monthly.*,bef.avg as before_avg from
+	 
+		(select distinct a.cust as customer,a.prod as product,b.month 
+		 from sales a, sales b 
+		 order by a.cust,a.prod,b.month) as monthly
+	 
+		left join 
+	 
+	 	(select cust,prod,month,avg(quant),(month+1) as before_month 
+	  	from sales 
+		group by cust,prod,month 
+	  	order by cust,prod,month ) as bef
+	 
+	    on monthly.customer = bef.cust and
+	  	monthly.product = bef.prod and
+	  	monthly.month = bef.before_month ) as before
+	  
+	left join 
+	
+	( select cust,prod,month,avg(quant),(month-1) as after_month 
+	  from sales group by cust,prod,month 
+	  order by cust,prod,month) as after
+	  
+	  on before.customer = after.cust and
+	  before.product = after.prod and
+	  before.month = after.after_month
